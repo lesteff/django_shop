@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}  <!-- ЭТУ СТРОКУ НУЖНО ДОБАВИТЬ -->
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-5">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}">
+        {% else %}
+            <img src="{% static 'no-image.png' %}" class="img-fluid rounded shadow-sm" alt="Нет фото">
+        {% endif %}
+    </div>
+    <div class="col-md-7">
+        <h2>{{ product.name }}</h2>
+        <p>{{ product.description }}</p>
+        <p><strong>Цена:</strong> {{ product.price }} руб.</p>
+        {% if product.in_stock %}
+            <p><span class="badge bg-success">В наличии</span></p>
+        {% else %}
+            <p><span class="badge bg-danger">Нет в наличии</span></p>
+        {% endif %}
+        <form method="post" action="{% url 'add_to_cart' product.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Добавить в корзину</button>
+        </form>
+        <a href="{% url 'products' %}" class="btn btn-outline-secondary mt-2">Назад к товарам</a>
+    </div>
+</div>
+{% endblock %}'django.contrib.staticfiles',

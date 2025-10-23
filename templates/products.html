@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-4">Список товаров</h1>
+{% load static %}
+<!-- Фильтр по категориям -->
+<div class="mb-3">
+    <strong>Категории:</strong>
+    <a href="{% url 'products' %}" class="btn btn-sm {% if not selected_category %}btn-success{% else %}btn-outline-success{% endif %}">Все</a>
+    {% for category in categories %}
+        <a href="?category={{ category.id }}" class="btn btn-sm {% if category.id|stringformat:"s" == selected_category %}btn-success{% else %}btn-outline-success{% endif %}">
+            {{ category.name }}
+        </a>
+    {% endfor %}
+</div>
+
+<!-- Список товаров -->
+<div class="row">
+    {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'no-image.png' %}" class="card-img-top" alt="Нет фото">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|truncatewords:15 }}</p>
+                    <p class="text-muted">{{ product.price }} руб.</p>
+                    {% if product.in_stock %}
+                        <span class="badge bg-success">В наличии</span>
+                    {% else %}
+                        <span class="badge bg-danger">Нет в наличии</span>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-primary btn-sm">Подробнее</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>Нет доступных товаров.</p>
+    {% endfor %}
+</div>
+{% endblock %}
