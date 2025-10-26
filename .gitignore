@@ -22,7 +22,7 @@ env/
 *.swp
 *.swo
 
-# Static files (если собираетесь их игнорировать)
+
 /staticfiles/
 /media/
 
