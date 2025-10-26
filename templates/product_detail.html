@@ -1,31 +1,128 @@
 {% extends "base.html" %}
-{% load static %}  <!-- ЭТУ СТРОКУ НУЖНО ДОБАВИТЬ -->
+{% load static %}
 
 {% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-5">
-        {% if product.image %}
-            <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}">
-        {% else %}
-            <img src="{% static 'no-image.png' %}" class="img-fluid rounded shadow-sm" alt="Нет фото">
-        {% endif %}
+        <!-- Главное изображение -->
+        <div class="mb-3 text-center">
+            {% with main_image=product.get_main_image %}
+                {% if main_image %}
+                    <img src="{{ main_image.url }}"
+                         class="img-fluid rounded shadow-sm"
+                         alt="{{ product.name }}"
+                         style="height: 300px; object-fit: cover; max-width: 100%;">
+                {% else %}
+                    <img src="{% static 'no-image.png' %}"
+                         class="img-fluid rounded shadow-sm"
+                         alt="Нет фото"
+                         style="height: 300px; object-fit: cover; max-width: 100%;">
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Галерея изображений -->
+        <div class="row">
+            {% for img_data in product.get_images_with_fallback %}
+            <div class="col-3 mb-2 text-center">
+                {% if img_data.is_real %}
+                    <div class="position-relative">
+                        <img src="{{ img_data.image.url }}"
+                             class="img-thumbnail {% if img_data.is_main %}border-success border-2{% else %}border-secondary{% endif %}"
+                             alt="{{ product.name }}"
+                             style="height: 80px; object-fit: cover; width: 100%;">
+                        {% if img_data.is_main %}
+                        <span class="position-absolute top-0 start-50 translate-middle badge bg-success">
+                            ★
+                        </span>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <img src="{% static 'no-image.png' %}"
+                         class="img-thumbnail border-light"
+                         alt="Нет изображения"
+                         style="height: 80px; object-fit: cover; width: 100%; opacity: 0.4;">
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Информация о главном изображении -->
+        <div class="mt-3 text-center">
+            <small class="text-muted">
+                ★ - главное изображение товара
+            </small>
+        </div>
     </div>
+
     <div class="col-md-7">
-        <h2>{{ product.name }}</h2>
-        <p>{{ product.description }}</p>
-        <p><strong>Цена:</strong> {{ product.price }} руб.</p>
-        {% if product.in_stock %}
-            <p><span class="badge bg-success">В наличии</span></p>
-        {% else %}
-            <p><span class="badge bg-danger">Нет в наличии</span></p>
+        <h2 class="mb-3">{{ product.name }}</h2>
+
+        <!-- Описание товара -->
+        <div class="card mb-4 border-0 bg-light">
+            <div class="card-body">
+                <h5 class="card-title text-primary">📋 Описание товара</h5>
+                <hr>
+                <p class="card-text fs-6">{{ product.description|linebreaks }}</p>
+            </div>
+        </div>
+
+        <!-- Цена и наличие -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="text-success mb-0">{{ product.price }} руб.</h4>
+                    </div>
+                    <div class="col-auto">
+                        {% if product.in_stock %}
+                            <span class="badge bg-success fs-6 p-2">✅ В наличии</span>
+                        {% else %}
+                            <span class="badge bg-danger fs-6 p-2">❌ Нет в наличии</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- КНОПКИ ДЕЙСТВИЙ - ЭТОТ БЛОК ДОЛЖЕН БЫТЬ -->
+        <div class="d-grid gap-2">
+            {% if product.in_stock %}
+            <form method="post" action="{% url 'add_to_cart' product.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-lg py-3">
+                    🛒 Добавить в корзину
+                </button>
+            </form>
+            {% else %}
+            <button class="btn btn-secondary btn-lg py-3" disabled>
+                ⚠️ Товар временно недоступен
+            </button>
+            {% endif %}
+
+            <a href="{% url 'products' %}" class="btn btn-outline-primary">
+                ← Вернуться к каталогу товаров
+            </a>
+
+            <!-- Ссылка на корзину -->
+            <a href="{% url 'cart_view' %}" class="btn btn-outline-warning">
+                🛒 Перейти в корзину
+            </a>
+        </div>
+
+        <!-- Дополнительная информация -->
+        {% if product.category %}
+        <div class="mt-4 pt-3 border-top">
+            <p class="text-muted mb-1">
+                <strong>Категория:</strong>
+                <a href="{% url 'products' %}?category={{ product.category.id }}" class="text-decoration-none">
+                    {{ product.category.name }}
+                </a>
+            </p>
+        </div>
         {% endif %}
-        <form method="post" action="{% url 'add_to_cart' product.id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success">Добавить в корзину</button>
-        </form>
-        <a href="{% url 'products' %}" class="btn btn-outline-secondary mt-2">Назад к товарам</a>
     </div>
 </div>
-{% endblock %}'django.contrib.staticfiles',
+{% endblock %}

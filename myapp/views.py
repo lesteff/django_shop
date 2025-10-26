@@ -1,5 +1,6 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 
 from .forms import RegisterForm
@@ -24,14 +25,20 @@ def register_view(request):
 def products_view(request):
     categories = Category.objects.all()
     category_id = request.GET.get('category')
+
     products = Product.objects.all()
     if category_id:
         products = products.filter(category_id=category_id)
 
+    paginator = Paginator(products, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'products.html', {
-        'products': products,
+        'products': page_obj.object_list,  # Берем продукты из page_obj
         'categories': categories,
-        'selected_category': category_id
+        'selected_category': category_id,
+        'page_obj': page_obj,
     })
 
 @login_required(login_url='/login/')

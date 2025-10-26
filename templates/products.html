@@ -2,6 +2,7 @@
 {% block content %}
 <h1 class="mb-4">Список товаров</h1>
 {% load static %}
+
 <!-- Фильтр по категориям -->
 <div class="mb-3">
     <strong>Категории:</strong>
@@ -13,25 +14,49 @@
     {% endfor %}
 </div>
 
+<!-- Информация о пагинации -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <p class="text-muted mb-0">
+        Показано {{ products|length }} из {{ page_obj.paginator.count }} товаров
+    </p>
+</div>
+
 <!-- Список товаров -->
 <div class="row">
     {% for product in products %}
         <div class="col-md-4 mb-4">
             <div class="card h-100 shadow-sm">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                {% else %}
-                    <img src="{% static 'no-image.png' %}" class="card-img-top" alt="Нет фото">
-                {% endif %}
-                <div class="card-body">
+                <!-- Блок изображения -->
+                <div class="product-card-image">
+                    {% with main_image=product.get_main_image %}
+                        {% if main_image %}
+                            <img src="{{ main_image.url }}"
+                                 class="card-img-top img-fluid"
+                                 alt="{{ product.name }}">
+                        {% else %}
+                            <img src="{% static 'no-image.png' %}"
+                                 class="card-img-top img-fluid no-image-placeholder"
+                                 alt="Нет фото">
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <div class="card-body card-body-flex">
                     <h5 class="card-title">{{ product.name }}</h5>
-                    <p class="card-text">{{ product.description|truncatewords:15 }}</p>
-                    <p class="text-muted">{{ product.price }} руб.</p>
-                    {% if product.in_stock %}
-                        <span class="badge bg-success">В наличии</span>
-                    {% else %}
-                        <span class="badge bg-danger">Нет в наличии</span>
-                    {% endif %}
+                    <p class="card-text card-text-flex">{{ product.description|truncatewords:15 }}</p>
+                    <p class="text-muted fs-5"><strong>{{ product.price }} руб.</strong></p>
+
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        {% if product.in_stock %}
+                            <span class="badge bg-success">В наличии</span>
+                        {% else %}
+                            <span class="badge bg-danger">Нет в наличии</span>
+                        {% endif %}
+
+                        {% if product.get_main_image %}
+                            <small class="text-muted">📷</small>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="card-footer text-center">
                     <a href="{% url 'product_detail' product.id %}" class="btn btn-primary btn-sm">Подробнее</a>
@@ -39,7 +64,59 @@
             </div>
         </div>
     {% empty %}
-        <p>Нет доступных товаров.</p>
+        <div class="col-12">
+            <p class="text-center">Нет доступных товаров.</p>
+        </div>
     {% endfor %}
 </div>
+
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <!-- Кнопка "Назад" -->
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">← Назад</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">← Назад</span>
+            </li>
+        {% endif %}
+
+        <!-- Номера страниц -->
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if selected_category %}&category={{ selected_category }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Кнопка "Вперед" -->
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Вперед →</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Вперед →</span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- Информация о текущей странице -->
+<div class="text-center mt-2">
+    <p class="text-muted">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+    </p>
+</div>
+{% endif %}
+
 {% endblock %}
