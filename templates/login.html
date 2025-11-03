@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru">
+{% extends 'base.html' %}
 <head>
     <meta charset="UTF-8">
     <title>Вход</title>
 </head>
 <body>
     <h1>Вход</h1>
-
+{% block content %}
     <form method="post">
         {% csrf_token %}
         <p>
@@ -22,4 +23,5 @@
 
     <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>
 </body>
+{% endblock %}
 </html>

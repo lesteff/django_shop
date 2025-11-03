@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Оформление заказа{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>📋 Оформление заказа</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Данные для связи</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="customer_name" class="form-label">Ваше имя</label>
+                            <input type="text" class="form-control" id="customer_name" name="customer_name" 
+                                   value="{{ request.POST.customer_name }}" placeholder="Как к вам обращаться?">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label">Номер телефона *</label>
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                   value="{{ request.POST.phone_number }}" required placeholder="+375(**)***-**-**">
+                            <div class="form-text">Обязательно для связи по заказу</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6>Ваш заказ:</h6>
+                            <div class="list-group">
+                                {% for item in cart_items %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ item.product.name }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ item.quantity }} шт. × {{ item.product.price }} руб.</small>
+                                    </div>
+                                    <span>{{ item.total }} руб.</span>
+                                </div>
+                                {% endfor %}
+                                <div class="list-group-item list-group-item-primary d-flex justify-content-between align-items-center">
+                                    <strong>Общая сумма:</strong>
+                                    <strong>{{ total }} руб.</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                ✅ Подтвердить заказ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
