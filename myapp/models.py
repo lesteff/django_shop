@@ -1,6 +1,9 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import ForeignKey
+
 
 
 # Create your models here.
@@ -58,6 +61,10 @@ class Product(models.Model):
         if first_image:
             return first_image.image
         return None
+    
+    @property
+    def price_with_vat(self):
+        return self.price * Decimal('1.2')
 
 
 class ProductImage(models.Model):
