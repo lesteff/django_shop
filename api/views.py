@@ -1,14 +1,17 @@
 
 from django.shortcuts import render
-from rest_framework import status
+from rest_framework import status, permissions
+from rest_framework.authentication import TokenAuthentication
 
 from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from myapp.models import Product
 from rest_framework.views import APIView
 
-from api.serializers import ProductSerializer
+from api.serializers import ProductSerializer, RegisterSerializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 # Create your views here.
@@ -40,6 +43,9 @@ class ProductDetailAPIView(APIView):
 
 
 class ProductListAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
@@ -127,3 +133,19 @@ def get_cookie_example(request):
     if token:
         return Response({'message': 'Cookie найден', 'token': token})
     return Response({'message': 'Cookie не найден'}, status=404)
+
+
+class RegisterAPIView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
