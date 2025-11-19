@@ -14,7 +14,7 @@ from datetime import timedelta
 from pathlib import Path
 import environ
 
-from django.conf.global_settings import SECRET_KEY, LOGOUT_REDIRECT_URL, LOGIN_REDIRECT_URL, STATICFILES_DIRS
+from django.conf.global_settings import SECRET_KEY, LOGOUT_REDIRECT_URL, LOGIN_REDIRECT_URL, STATICFILES_DIRS, CACHES
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -164,4 +164,30 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
+}
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': "django.core.cache.backends.memcached.PyMemcacheCache",
+#         'LOCATION': "127.0.0.1:11211",
+#     }
+# }
+# CACHES = {
+#     'default': {
+#         'BACKEND': "django.core.cache.backends.redis.RedisCache",
+#         'LOCATION': "redis://127.0.0.1:6379",
+#     }
+# }
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         'LOCATION': 'my_cache_table',
+#     }
+# }
+
+CACHES = {
+    'default': {
+        'BACKEND': "django.core.cache.backends.locmem.LocMemCache",
+    }
 }

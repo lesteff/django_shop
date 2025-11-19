@@ -1,5 +1,7 @@
-
+from django.core.cache import cache
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import status, permissions
 from rest_framework.authentication import TokenAuthentication
 
@@ -46,21 +48,32 @@ class ProductListAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
+
+    @method_decorator(cache_page(60*60))
     def get(self, request):
+        print(">>>>>>>get")
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
 
 class ProductCreateAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
-        serializer = ProductSerializer(data=request.data)  # десериализация входных данных
-        if serializer.is_valid():  # проверка данных
-            serializer.save()  # создание нового объекта Product
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            self.clear_product_list_cache()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def clear_product_list_cache(self):
+        cache_key = 'products_list_cache'
+        cache.delete(cache_key)
+        print(">>>>>>> Кэш очищен")
 
 
 class ProductDeleteAPIView(APIView):
