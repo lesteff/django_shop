@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
-from myapp.models import Product, Category
+from myapp.models import Product, Category, OrderItem, Order
 from django.contrib.auth.models import User
+
+
 
 
 # from myapp.models import Product
@@ -57,3 +59,60 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+class ProductDiscountSerializer(serializers.ModelSerializer):
+    discount_percent = serializers.IntegerField(
+        min_value=0,
+        max_value=100,
+        required=True,
+        help_text="Скидка в процентах : 0-100"
+    )
+
+    class Meta:
+        model = Product
+        fields = ["discount_percent"]
+
+    def update(self, instance, validated_data):
+        instance.discount_percent = validated_data.get('discount_percent')
+        instance.save()
+        return instance
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+class ProductSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    total = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'quantity', 'price', 'total']
+
+    def get_total(self, obj):
+        return obj.get_total()
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'user', 'phone_number', 'customer_name',
+                    'total_amount', 'created_at', 'items']
+        read_only_fields = ['user', 'total_amount', 'created_at']
+
+class CartItemSerializer(serializers.Serializer):
+        product_id = serializers.IntegerField()
+        quantity = serializers.IntegerField(min_value=1, default=1)
+
+class CheckoutSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=20)
+    customer_name = serializers.CharField(max_length=100, required=False, allow_blank=True)

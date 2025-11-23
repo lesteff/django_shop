@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -189,5 +189,59 @@ SIMPLE_JWT = {
 CACHES = {
     'default': {
         'BACKEND': "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
+
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "[{levelname}] {asctime} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+            "django_file":{
+                "class": "logging.FileHandler",
+                "filename": os.path.join(LOG_DIR, "django.log"),
+                "formatter": "simple",
+            },
+
+            "app_file":{
+                "class": "logging.FileHandler",
+                "filename": os.path.join(LOG_DIR, "app.log"),
+                "formatter": "simple",
+            },
+            "console":{
+                "class": "logging.StreamHandler",
+                "formatter": "simple",
+            },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["django_file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+
+        "django.server":{
+            "handlers": ["django_file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.security":{
+            "handlers": ["django_file", "console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "api":{
+            "handlers": ["app_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
     }
 }

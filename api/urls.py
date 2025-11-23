@@ -6,7 +6,11 @@ from django.urls import path
 from django.urls import path
 
 from api.views import (test_api, ProductDetailAPIView, ProductListAPIView, ProductCreateAPIView,
-                       set_cookie_example, get_cookie_example, ProductDeleteAPIView, ProductUpdateAPIView, RegisterAPIView)
+                       set_cookie_example, get_cookie_example, ProductDeleteAPIView, ProductUpdateAPIView,
+                       RegisterAPIView,SetDiscountAPIView, OrderListAPIView,
+                       OrderDetailAPIView, OrderCheckoutAPIView,CartClearAPIView, CartRemoveAPIView,
+                       CartAddAPIView, CartDetailAPIView)
+
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
@@ -27,5 +31,15 @@ urlpatterns = [
 
     path('register/', RegisterAPIView.as_view(), name='api_register'),
 #     path('logout/', LogoutAPIView.as_view(), name='api_logout'),
+    path("products/<int:pk>/discount", SetDiscountAPIView.as_view(), name='product_detail'),
 
+    path('cart/', CartDetailAPIView.as_view(), name='cart-detail'),
+    path('cart/add/', CartAddAPIView.as_view(), name='cart-add'),
+    path('cart/remove/', CartRemoveAPIView.as_view(), name='cart-remove'),
+    path('cart/clear/', CartClearAPIView.as_view(), name='cart-clear'),
+
+    # Заказы
+    path('orders/', OrderListAPIView.as_view(), name='order-list'),
+    path('orders/<int:pk>/', OrderDetailAPIView.as_view(), name='order-detail'),
+    path('orders/checkout/', OrderCheckoutAPIView.as_view(), name='order-checkout'),
 ]

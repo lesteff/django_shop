@@ -1,6 +1,8 @@
 import time
 from http.client import responses
+import logging
 
+logger = logging.getLogger("api")
 
 
 
@@ -11,10 +13,11 @@ class RequestTimerMiddleware:
 
     def __call__(self, request):
         start_time = time.time()
-        print("Запрос пришел", request.path)
+        logger.info(f"Запрос пришел {request.path}")
         response = self.get_response(request)
-        print("Ответ готов", response.status_code)
+        logger.info(f"Ответ готов {response.status_code}")
         end_time = time.time()
-        print(f'Время выполнения : {end_time - start_time}')
+        finish_time = end_time - start_time
+        logger.info(f'Время выполнения : {round(finish_time,3)}')
         return response
 

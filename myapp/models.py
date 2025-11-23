@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import ForeignKey
@@ -20,6 +21,7 @@ class Product(models.Model):
         blank=True,
         verbose_name="Категория"
     )
+    discount_percent = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
 
     def get_images_with_fallback(self):
         """Возвращает 4 изображения с заполнением no-image.png"""
@@ -65,6 +67,9 @@ class Product(models.Model):
     @property
     def price_with_vat(self):
         return self.price * Decimal('1.2')
+
+    def apply_discount(self, percent):
+        return float(self.price) * (1 - percent / 100)
 
 
 class ProductImage(models.Model):
