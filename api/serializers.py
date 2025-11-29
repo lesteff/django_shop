@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from myapp.models import Product, Category, OrderItem, Order
+from myapp.models import Product, Category, OrderItem, Order, Cart, CartItem
 from django.contrib.auth.models import User
 
 
@@ -82,12 +82,12 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = '__all__'
 
-class ProductSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-
-    class Meta:
-        model = Product
-        fields = '__all__'
+# class ProductSerializer(serializers.ModelSerializer):
+#     category = CategorySerializer(read_only=True)
+#
+#     class Meta:
+#         model = Product
+#         fields = '__all__'
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
@@ -109,9 +109,36 @@ class OrderSerializer(serializers.ModelSerializer):
                     'total_amount', 'created_at', 'items']
         read_only_fields = ['user', 'total_amount', 'created_at']
 
-class CartItemSerializer(serializers.Serializer):
-        product_id = serializers.IntegerField()
-        quantity = serializers.IntegerField(min_value=1, default=1)
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    total_price = serializers.ReadOnlyField()
+    price_per_item = serializers.ReadOnlyField()
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'quantity', 'price_per_item', 'total_price']
+
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.ReadOnlyField()
+    total_quantity = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Cart
+        fields = ['id', 'items', 'total_price', 'total_quantity', 'created_at', 'updated_at']
+
+
+class AddToCartSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1, default=1)
+
+
+class UpdateCartItemSerializer(serializers.Serializer):
+    quantity = serializers.IntegerField(min_value=1)
+
+
 
 class CheckoutSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=20)

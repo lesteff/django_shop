@@ -139,3 +139,67 @@ class OrderItem(models.Model):
         return f"{self.product.name} x {self.quantity}"
 
 
+class Cart(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name="Пользователь"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    def __str__(self):
+        return f"Корзина пользователя {self.user.username}"
+
+    @property
+    def total_price(self):
+        return sum(item.total_price for item in self.items.all())
+
+    @property
+    def total_quantity(self):
+        return sum(item.quantity for item in self.items.all())
+
+    class Meta:
+        verbose_name = "Корзина"
+        verbose_name_plural = "Корзины"
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name="Корзина"
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        verbose_name="Товар"
+    )
+    quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
+    added_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата добавления")
+
+    class Meta:
+        unique_together = ['cart', 'product']
+        verbose_name = "Элемент корзины"
+        verbose_name_plural = "Элементы корзины"
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name}"
+
+    @property
+    def total_price(self):
+        # Применяем скидку если есть
+        if self.product.discount_percent > 0:
+            discounted_price = float(self.product.price) * (1 - self.product.discount_percent / 100)
+            return discounted_price * self.quantity
+        return self.product.price * self.quantity
+
+    @property
+    def price_per_item(self):
+        # Цена за единицу с учетом скидки
+        if self.product.discount_percent > 0:
+            return float(self.product.price) * (1 - self.product.discount_percent / 100)
+        return self.product.price
+
