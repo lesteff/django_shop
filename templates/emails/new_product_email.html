@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; }
+        .content { background: #f9f9f9; padding: 20px; border-radius: 5px; margin-top: 10px; }
+        .product-info { background: white; padding: 15px; border-left: 4px solid #4CAF50; margin: 10px 0; }
+        .footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🎉 Создан новый продукт!</h2>
+        </div>
+
+        <div class="content">
+            <p>В системе был создан новый продукт:</p>
+
+            <div class="product-info">
+                <h3>{{ product_name }}</h3>
+                <p><strong>Цена:</strong> {{ product_price }}</p>
+                <p><strong>ID продукта:</strong> {{ product_id }}</p>
+                <p><strong>Создал:</strong> {{ created_by }}</p>
+            </div>
+
+            <p>Вы можете просмотреть подробную информацию о продукте в административной панели.</p>
+        </div>
+
+        <div class="footer">
+            <p>Это автоматическое сообщение. Пожалуйста, не отвечайте на него.</p>
+            <p>© {% now "Y" %} Ваша компания. Все права защищены.</p>
+        </div>
+    </div>
+</body>
+</html>
